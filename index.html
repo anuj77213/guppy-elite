@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guppy Elite | Nexus v3.0 Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0a0b10;
+            --card-bg: rgba(16, 18, 27, 0.9);
+            --hacker-green: #0ea;
+            --terminal-red: #ff3131;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Fira Code', monospace; 
+            background-color: var(--dark-bg); 
+            color: #e0e0e0; 
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* Scanline Effect (Hacker Feel) */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 9999;
+            pointer-events: none;
+            background-size: 100% 4px, 3px 100%;
+        }
+
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            background: rgba(10, 11, 16, 0.95);
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+        .logo { font-size: 24px; font-weight: 700; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .nav-links a { text-decoration: none; color: #fff; margin-left: 20px; font-size: 0.9rem; transition: 0.3s; cursor: pointer; }
+        .nav-links a:hover { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+        #cart-count { background: var(--neon-purple); color: white; padding: 2px 6px; border-radius: 50%; font-size: 12px; margin-left: 5px; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1544551763-47a0159f963f?q=80&w=2070');
+            background-size: cover;
+            border-bottom: 2px solid var(--neon-purple);
+        }
+        .hero h1 { font-size: 3.5rem; color: #fff; text-shadow: 0 0 20px var(--neon-purple); margin-bottom: 10px; }
+        .hero p { color: var(--neon-blue); margin-bottom: 30px; font-weight: bold; }
+
+        /* --- PRODUCT GRID --- */
+        .shop-container { padding: 60px 5%; max-width: 1300px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 50px; color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+        
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: 0.4s;
+            position: relative;
+        }
+        .product-card:hover { border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); transform: translateY(-10px); }
+        .product-card img { width: 100%; height: 220px; object-fit: cover; }
+        .product-info { padding: 20px; text-align: center; }
+        .price-tag { font-size: 1.5rem; color: var(--hacker-green); margin-bottom: 15px; font-weight: bold; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .btn {
+            width: 100%; padding: 12px; border: none; cursor: pointer; font-family: 'Orbitron'; 
+            font-weight: bold; text-transform: uppercase; transition: 0.3s; font-size: 0.8rem;
+        }
+        .btn-buy { background: var(--neon-blue); color: #000; }
+        .btn-cart { background: transparent; border: 1px solid var(--neon-purple); color: var(--neon-purple); }
+        .btn-wa { background: transparent; border: 1px solid var(--hacker-green); color: var(--hacker-green); }
+
+        /* --- MODALS --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
+        .modal-content { background: #0d1117; margin: 5% auto; padding: 25px; border: 1px solid var(--neon-blue); width: 90%; max-width: 450px; box-shadow: 0 0 30px var(--neon-blue); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #161b22; border: 1px solid #30363d; color: white; font-family: 'Fira Code'; }
+        
+        /* --- REVIEWS --- */
+        .reviews-section { padding: 60px 5%; background: rgba(20, 20, 30, 0.5); }
+        .review-card { background: #161b22; padding: 20px; border-left: 4px solid var(--neon-purple); border-radius: 5px; margin-bottom: 20px; }
+        
+        /* --- SUPPORT --- */
+        .support-section { text-align: center; padding: 60px 5%; border-top: 1px solid var(--neon-blue); }
+
+        .contact-bar { background: #000; color: var(--hacker-green); padding: 15px 25px; position: fixed; bottom: 20px; right: 20px; border: 1px solid var(--hacker-green); border-radius: 5px; text-decoration: none; font-weight: bold; z-index: 100; box-shadow: 0 0 10px var(--hacker-green); }
+
+        footer { border-top: 1px solid #333; padding: 40px; text-align: center; margin-top: 50px; font-size: 0.8rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo" >SIDDHU GUPPY FARM</div>
+    <div class="nav-links">
+        <a href="#home">//HOME</a>
+        <a href="#shop">//STORE</a>
+        <a id="login-nav" onclick="showModal('loginModal')">//LOGIN</a>
+        <a id="profile-nav" onclick="showModal('profileModal')" style="display:none; color: var(--hacker-green);">//MY_ACCOUNT</a>
+        <a onclick="showCart()">//CART<span id="cart-count">0</span></a>
+    </div>
+</nav>
+
+<section class="hero" id="home">
+    <h1>CYBER AQUATICS</h1>
+    <p>> INITIALIZING PREMIUM GUPPY_DATABASE... [SUCCESS]</p>
+    <a href="#shop" class="btn btn-buy" style="width:auto; padding: 12px 40px; text-decoration:none;">ACCESS COLLECTION</a>
+</section>
+
+<section class="shop-container" id="shop">
+    <h2 class="section-title">Available_Species</h2>
+    <div class="product-grid" id="product-list">
+        <div class="product-card">
+            <img src="1f (2).jpeg" alt="Normal Guppy">
+            <div class="product-info">
+                <h3>Normal_Guppy.sys</h3>
+                <div class="price-tag">₹150</div>
+                <div class="btn-group">
+                    <button class="btn btn-buy" onclick="checkoutSingle('Normal_Guppy.sys', 150)">BUY_NOW</button>
+                    <button class="btn btn-cart" onclick="addToCart('Normal_Guppy.sys', 150)">ADD_TO_CART</button>
+                    <button class="btn btn-wa" onclick="orderWhatsApp('Normal_Guppy.sys')">ORDER_VIA_WA</button>
+                </div>
+            </div>
+        </div>
+        <div class="product-card">
+            <img src="2f2.jpeg" alt="Premium Guppy">
+            <div class="product-info">
+                <h3>Premium_v2.0</h3>
+                <div class="price-tag">₹250</div>
+                <div class="btn-group">
+                    <button class="btn btn-buy" onclick="checkoutSingle('Premium_v2.0', 250)">BUY_NOW</button>
+                    <button class="btn btn-cart" onclick="addToCart('Premium_v2.0', 250)">ADD_TO_CART</button>
+                    <button class="btn btn-wa" onclick="orderWhatsApp('Premium_v2.0')">ORDER_VIA_WA</button>
+                </div>
+            </div>
+        </div>
+        <div class="product-card">
+            <img src="3f.jpeg" alt="Fancy Guppy">
+            <div class="product-info">
+                <h3>Fancy_Edition</h3>
+                <div class="price-tag">₹200</div>
+                <div class="btn-group">
+                    <button class="btn btn-buy" onclick="checkoutSingle('Fancy_Edition', 200)">BUY_NOW</button>
+                    <button class="btn btn-cart" onclick="addToCart('Fancy_Edition', 200)">ADD_TO_CART</button>
+                    <button class="btn btn-wa" onclick="orderWhatsApp('Fancy_Edition')">ORDER_VIA_WA</button>
+                </div>
+            </div>
+        </div>
+        <div class="product-card">
+            <img src="4f.jpeg" alt="Super Guppy">
+            <div class="product-info">
+                <h3>Super_User_Fish</h3>
+                <div class="price-tag">₹350</div>
+                <div class="btn-group">
+                    <button class="btn btn-buy" onclick="checkoutSingle('Super_User_Fish', 350)">BUY_NOW</button>
+                    <button class="btn btn-cart" onclick="addToCart('Super_User_Fish', 350)">ADD_TO_CART</button>
+                    <button class="btn btn-wa" onclick="orderWhatsApp('Super_User_Fish')">ORDER_VIA_WA</button>
+                </div>
+            </div>
+        </div>
+        <div class="product-card">
+            <img src="5f.jpeg" alt="King Guppy">
+            <div class="product-info">
+                <h3>King_Admin.exe</h3>
+                <div class="price-tag">₹300</div>
+                <div class="btn-group">
+                    <button class="btn btn-buy" onclick="checkoutSingle('King_Admin.exe', 300)">BUY_NOW</button>
+                    <button class="btn btn-cart" onclick="addToCart('King_Admin.exe', 300)">ADD_TO_CART</button>
+                    <button class="btn btn-wa" onclick="orderWhatsApp('King_Admin.exe')">ORDER_VIA_WA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="reviews-section">
+    <h2 class="section-title">User_Feedback</h2>
+    <div style="max-width: 800px; margin: auto;">
+        <div class="review-card">
+            <div style="color: #ffcc00; margin-bottom: 5px;">⭐⭐⭐⭐⭐</div>
+            <p>"Awesome fish! Very healthy and colors are glowing. Great service."</p>
+            <small style="color: var(--neon-blue);">- Aryan_K</small>
+        </div>
+        <div class="review-card">
+            <div style="color: #ffcc00; margin-bottom: 5px;">⭐⭐⭐⭐</div>
+            <p>"Delivery was on time. The packaging was top notch."</p>
+            <small style="color: var(--neon-blue);">- Rahul_99</small>
+        </div>
+    </div>
+</section>
+
+<section class="support-section" id="support">
+    <h2 class="section-title">Customer_Support</h2>
+    <div style="border: 1px dashed var(--neon-blue); padding: 30px; display: inline-block; border-radius: 10px;">
+        <p>For aquarium guidance or fish care contact us anytime.</p>
+        <p style="font-weight: bold; margin: 15px 0;">PH: +91 7354103448</p>
+        <a href="https://wa.me/7354103448" class="btn btn-wa" style="text-decoration:none; padding: 10px 20px;">WHATSAPP_SUPPORT</a>
+    </div>
+</section>
+
+<div id="loginModal" class="modal"><div class="modal-content">
+    <h2 style="color: var(--neon-blue);">USER_AUTH</h2>
+    <input type="text" id="reg-name" placeholder="Full Name">
+    <input type="text" id="reg-phone" placeholder="Phone Number">
+    <button class="btn btn-buy" onclick="handleLogin()">INITIALIZE_LOGIN</button>
+    <button class="btn" style="margin-top:10px; color:gray;" onclick="closeModal('loginModal')">CANCEL</button>
+</div></div>
+
+<div id="profileModal" class="modal"><div class="modal-content">
+    <h2 style="color: var(--hacker-green);">ACCOUNT_DETAILS</h2>
+    <div id="user-info-display" style="margin: 20px 0; border-bottom: 1px solid #333; padding-bottom: 10px;"></div>
+    <h3>ORDER_HISTORY</h3>
+    <div id="order-history-list" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+    <button class="btn btn-buy" style="margin-top:20px;" onclick="handleLogout()">LOGOUT</button>
+    <button class="btn" style="margin-top:10px;" onclick="closeModal('profileModal')">CLOSE</button>
+</div></div>
+
+<div id="checkoutModal" class="modal"><div class="modal-content">
+    <h2 style="color: var(--neon-blue);">CHECKOUT_SECURE</h2>
+    <div id="checkout-summary" style="margin: 15px 0; color: var(--hacker-green);"></div>
+    <input type="text" id="ship-address" placeholder="Shipping Address (Full Address)">
+    <select id="pay-method">
+        <option value="Online">Razorpay Online</option>
+        <option value="UPI">UPI Transfer</option>
+        <option value="COD">Cash on Delivery</option>
+        <option value="WhatsApp">Pay Later (WhatsApp Order)</option>
+    </select>
+    <button class="btn btn-buy" onclick="completePurchase()">PLACE_ORDER_ENCRYPTED</button>
+    <button class="btn" style="margin-top:10px; color:var(--terminal-red);" onclick="closeModal('checkoutModal')">ABORT</button>
+</div></div>
+
+<a href="https://wa.me/919009240609" class="contact-bar">> ESTABLISH_WHATSAPP_LINK</a>
+
+<footer>
+    <p>SECURED TERMINAL | &copy; 2026 GUPPY_ELITE_VAULT</p>
+</footer>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    // --- ADMIN CONFIG ---
+    const CONFIG = {
+        phone: "919009240609",
+        upiID: "9009240609@fam",
+        razorpayKey: "YOUR_RAZORPAY_KEY"
+    };
+
+    let cart = [];
+    let currentUser = JSON.parse(localStorage.getItem('guppyUser')) || null;
+
+    window.onload = () => updateUI();
+
+    function updateUI() {
+        if(currentUser) {
+            document.getElementById('login-nav').style.display = 'none';
+            document.getElementById('profile-nav').style.display = 'inline';
+            document.getElementById('profile-nav').innerText = `//${currentUser.name.toUpperCase()}`;
+        } else {
+            document.getElementById('login-nav').style.display = 'inline';
+            document.getElementById('profile-nav').style.display = 'none';
+        }
+    }
+
+    function addToCart(name, price) {
+        cart.push({name, price});
+        document.getElementById('cart-count').innerText = cart.length;
+        alert(">> Item added to Cart.");
+    }
+
+    function showCart() {
+        if(!currentUser) return showModal('loginModal');
+        if(cart.length === 0) return alert("Cart is empty.");
+        let total = cart.reduce((s, i) => s + i.price, 0);
+        document.getElementById('checkout-summary').innerText = `Items: ${cart.length} | Total: ₹${total}`;
+        showModal('checkoutModal');
+    }
+
+    function checkoutSingle(name, price) {
+        cart = [{name, price}];
+        showCart();
+    }
+
+    function handleLogin() {
+        const name = document.getElementById('reg-name').value;
+        const phone = document.getElementById('reg-phone').value;
+        if(!name || !phone) return alert("Enter details!");
+        currentUser = { name, phone, orders: [] };
+        localStorage.setItem('guppyUser', JSON.stringify(currentUser));
+        updateUI();
+        closeModal('loginModal');
+    }
+
+    function completePurchase() {
+        const addr = document.getElementById('ship-address').value;
+        const method = document.getElementById('pay-method').value;
+        if(!addr) return alert("Address is required!");
+
+        const orderID = "GE-" + Math.floor(10000 + Math.random() * 90000);
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        const itemNames = cart.map(i => i.name).join(", ");
+
+        const newOrder = { id: orderID, items: itemNames, amount: total, method: method, date: new Date().toLocaleDateString() };
+        currentUser.orders.push(newOrder);
+        localStorage.setItem('guppyUser', JSON.stringify(currentUser));
+
+        // WhatsApp notification
+        const msg = encodeURIComponent(`NEW ORDER!\nID: ${orderID}\nItems: ${itemNames}\nTotal: ₹${total}\nAddress: ${addr}\nMethod: ${method}`);
+        window.open(`https://wa.me/${CONFIG.phone}?text=${msg}`, '_blank');
+
+        alert(`ORDER SUCCESSFUL! ID: ${orderID}`);
+        cart = [];
+        document.getElementById('cart-count').innerText = 0;
+        closeModal('checkoutModal');
+    }
+
+    function showModal(id) {
+        document.getElementById(id).style.display = 'block';
+        if(id === 'profileModal') {
+            document.getElementById('user-info-display').innerHTML = `<strong>NAME:</strong> ${currentUser.name}<br><strong>PHONE:</strong> ${currentUser.phone}`;
+            let list = document.getElementById('order-history-list');
+            list.innerHTML = currentUser.orders.length ? '' : 'No orders yet.';
+            currentUser.orders.forEach(o => {
+                list.innerHTML += `<div style="border:1px solid #333; padding:5px; margin-bottom:5px; font-size:12px;">ID: ${o.id} | ₹${o.amount} | ${o.date}</div>`;
+            });
+        }
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function handleLogout() { localStorage.removeItem('guppyUser'); location.reload(); }
+    function orderWhatsApp(name) { window.open(`https://wa.me/${CONFIG.phone}?text=Hello, I want to order ${name}`, '_blank'); }
+</script>
+
+</body>
+</html>
