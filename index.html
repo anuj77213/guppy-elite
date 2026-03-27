@@ -262,6 +262,7 @@
 
 <footer>
     <p>SECURED TERMINAL | &copy; 2026 GUPPY_ELITE_VAULT</p>
+    <div class="dev-credit">MADE BY HARSH AND ANUJ</div>
 </footer>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -300,6 +301,8 @@
         if(cart.length === 0) return alert("Cart is empty.");
         let total = cart.reduce((s, i) => s + i.price, 0);
         document.getElementById('checkout-summary').innerText = `Items: ${cart.length} | Total: ₹${total}`;
+        // Pre-fill name if user logged in
+        document.getElementById('cust-name-order').value = currentUser.name;
         showModal('checkoutModal');
     }
 
@@ -318,7 +321,9 @@
         closeModal('loginModal');
     }
 
-    function completePurchase() {
+    function completePurchase() {    
+        const name = document.getElementById('cust-name-order').value;
+        const city = document.getElementById('cust-city-order').value;
         const addr = document.getElementById('ship-address').value;
         const method = document.getElementById('pay-method').value;
         if(!addr) return alert("Address is required!");
@@ -331,8 +336,8 @@
         currentUser.orders.push(newOrder);
         localStorage.setItem('guppyUser', JSON.stringify(currentUser));
 
-        // WhatsApp notification
-        const msg = encodeURIComponent(`NEW ORDER!\nID: ${orderID}\nItems: ${itemNames}\nTotal: ₹${total}\nAddress: ${addr}\nMethod: ${method}`);
+        // WhatsApp notification with Name and City
+        const msg = encodeURIComponent(`🚨 NEW ORDER ALERT!\n\n🆔 Order ID: ${orderID}\n👤 Customer: ${name}\n📍 City: ${city}\n🏠 Address: ${addr}\n📦 Items: ${itemNames}\n💰 Total: ₹${total}\n💳 Method: ${method}`);
         window.open(`https://wa.me/${CONFIG.phone}?text=${msg}`, '_blank');
 
         alert(`ORDER SUCCESSFUL! ID: ${orderID}`);
